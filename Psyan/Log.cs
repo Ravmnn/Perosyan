@@ -1,6 +1,6 @@
 using Spectre.Console;
 
-using Psyan.Analyzer.Exceptions;
+using Psyan.Analyzer;
 
 
 namespace Psyan;
@@ -10,6 +10,6 @@ namespace Psyan;
 
 public static class Log
 {
-    public static void Error(GrammarException exception)
-        => AnsiConsole.MarkupLine(exception.Format());
+    public static void Error(InvalidSyllable error)
+        => AnsiConsole.MarkupLine(error.FormatError());
 }

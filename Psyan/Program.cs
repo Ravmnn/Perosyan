@@ -1,10 +1,8 @@
-﻿using System.CommandLine.Help;
-
-using Spectre.Console;
+﻿using Spectre.Console;
 
 using PrettyPrompt;
+
 using Psyan.Analyzer;
-using Psyan.Analyzer.Exceptions;
 
 
 namespace Psyan;
@@ -34,8 +32,8 @@ class Program
 
         if (options.Source is null && options.SourceFile is null)
         {
-            new HelpAction().Invoke(root.Result);
-            return;
+            var source = await Console.In.ReadToEndAsync();
+            options = options with { Source = source };
         }
 
         RunPassive(options);
@@ -51,25 +49,26 @@ class Program
 
         var wordsSyllables = new List<Syllable[]>();
 
-        try
+        foreach (var token in tokens)
         {
-            foreach (var token in tokens)
-                wordsSyllables.Add(new OrthographicAnalyzer(token.Lexeme).Split());
+            var syllables = new OrthographicAnalyzer(token.Lexeme).Split();
 
-            foreach (var wordSyllable in wordsSyllables)
-            {
-                for (var i = 0; i < wordSyllable.Length; i++)
+            foreach (var syllable in syllables)
+                if (syllable is InvalidSyllable invalid)
                 {
-                    var syllable = wordSyllable[i];
-                    AnsiConsole.Write($"{syllable.Substring}{(i + 1 < wordSyllable.Length ? "-" : "")}");
+                    Log.Error(invalid);
+                    return;
                 }
 
-                AnsiConsole.WriteLine();
-            }
+            wordsSyllables.Add(syllables);
         }
-        catch (OrthographicException exception)
+
+        foreach (var wordSyllable in wordsSyllables)
         {
-            Log.Error(exception);
+            for (var i = 0; i < wordSyllable.Length; i++)
+                AnsiConsole.Write($"{wordSyllable[i].SubString}{(i + 1 < wordSyllable.Length ? "-" : "")}");
+
+            AnsiConsole.WriteLine();
         }
     }
 

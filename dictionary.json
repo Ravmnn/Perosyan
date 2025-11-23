@@ -1,0 +1,22 @@
+{
+  "kani": {
+    "meaning": "dog",
+    "description": "A domesticated mammal (Canis lupus familiaris), descended from wolves and widely kept as a companion animal, working animal, or service animal. Dogs are known for their social behavior, trainability, and strong bond with humans, and they exhibit significant variation across hundreds of breeds differing in physical traits, temperament, and specialized abilities such as herding, guarding, hunting, and scent detection.",
+    "summary": "A domesticated mammal kept as a companion or working animal, noted for its loyalty, trainability, and diverse breeds.",
+    "examples": []
+  },
+
+  "kiti": {
+    "meaning": "cat",
+    "description": "A small domesticated mammal (Felis catus) kept primarily as a companion animal and valued for its agility, independence, and ability to hunt small prey such as rodents. Cats possess keen senses, retractable claws, and a wide range of vocalizations and body language used for communication. They display varied coat colors and patterns across numerous breeds, while maintaining strong territorial instincts and a largely solitary but adaptable social nature.",
+    "summary": "A small domesticated mammal kept as a companion animal, known for its agility, independence, and hunting abilities.",
+    "examples": []
+  },
+
+  "lupi": {
+    "meaning": "wolf",
+    "description": "A large wild carnivorous mammal (Canis lupus), typically living in packs and inhabiting forests, tundras, and grasslands across the Northern Hemisphere. Wolves are highly social animals with complex hierarchical structures, cooperative hunting strategies, and strong territorial behavior. They possess keen senses, powerful jaws, and endurance suited for pursuing prey such as deer, elk, and smaller mammals. Subspecies and regional populations vary in size, coat color, and ecological adaptation.",
+    "summary": "A large wild pack-living carnivore known for its cooperative hunting and strong social structure.",
+    "examples": []
+  }
+}

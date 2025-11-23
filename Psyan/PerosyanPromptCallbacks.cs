@@ -61,8 +61,13 @@ public class PerosyanPromptCallbacks : PromptCallbacks
     {
         var absoluteIndex = errorIndex + token.Location.Start;
 
+        var atLastCharacter = errorIndex == token.Lexeme.Length - 1;
+
         spans.Add(new FormatSpan(token.Location.Start, errorIndex, AnsiColor.Red));
+
+        if (!atLastCharacter)
+            spans.Add(new FormatSpan(absoluteIndex + 1, token.Lexeme.Length - errorIndex - 1, AnsiColor.Red));
+
         spans.Add(new FormatSpan(absoluteIndex, 1, new ConsoleFormat(AnsiColor.Red, Underline: true)));
-        spans.Add(new FormatSpan(absoluteIndex + 1, token.Lexeme.Length - errorIndex - 1, AnsiColor.Red));
     }
 }

@@ -1,15 +1,4 @@
-using Psyan.Analyzer.Exceptions;
-
-
 namespace Psyan.Analyzer;
-
-
-
-
-public readonly record struct Syllable(string Substring, int Start)
-{
-    public int End => Start + Substring.Length;
-}
 
 
 
@@ -23,13 +12,9 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
 
 
+
     public Syllable[] Split()
-        => TrySplit(out var errorIndex) ?? throw new OrthographicException(Word, errorIndex!.Value, "Invalid orthography");
-
-
-    public Syllable[]? TrySplit(out int? errorIndex)
     {
-        errorIndex = null;
         _syllables = [];
 
 
@@ -52,8 +37,7 @@ public class OrthographicAnalyzer(string sourceWord = "")
             if (AddedTriSyllableDelimiterToLast(word, i) || AddedBiSyllable(word, ref i))
                 continue;
 
-            errorIndex = i;
-            return null;
+            _syllables.Add(new InvalidSyllable(word, i, i + 1, "Invalid character sequence"));
         }
 
         return _syllables.ToArray();
@@ -65,7 +49,7 @@ public class OrthographicAnalyzer(string sourceWord = "")
         if (IsCurrentCharacterATriSyllableDelimiter(word, i))
         {
             var lastSyllable = _syllables[^1];
-            _syllables[^1] = lastSyllable with { Substring = lastSyllable.Substring + word[i] };
+            _syllables[^1] = new Syllable(word, lastSyllable.Start, lastSyllable.Start + 3);
 
             return true;
         }
@@ -78,10 +62,7 @@ public class OrthographicAnalyzer(string sourceWord = "")
     {
         if (IsNextSequenceASyllable(word, i))
         {
-            var start = i;
-            var end = i + 2;
-
-            _syllables.Add(new Syllable(word[start .. end], i));
+            _syllables.Add(new Syllable(word, i, i + 2));
             i++;
 
             return true;
@@ -94,12 +75,12 @@ public class OrthographicAnalyzer(string sourceWord = "")
     private void TryToAddSingleSyllable(string word)
     {
         if (word.Length > 0 && Alphabet.Vowels.Contains(word[0]))
-            _syllables.Add(new Syllable(word[0].ToString(), 0));
+            _syllables.Add(new Syllable(word, 0, 1));
     }
 
 
     private bool IsCurrentCharacterATriSyllableDelimiter(string word, int i)
-        => i >= 2 && word[i] == 's' && _syllables.Last().Substring.Last() != 's';
+        => i >= 2 && word[i] == 's' && _syllables.Last().SubString.Last() != 's';
 
 
     private bool IsNextSequenceASyllable(string word, int i)
@@ -110,8 +91,11 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
     public int? GetOrthographyErrorIndex()
     {
-        TrySplit(out var errorIndex);
-        return errorIndex;
+        foreach (var syllable in Split())
+            if (syllable is InvalidSyllable invalid)
+                return invalid.Start;
+
+        return null;
     }
 
 
