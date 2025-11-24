@@ -10,6 +10,9 @@ public class Syllable(string word, int start, int end)
 
     public int Start { get; } = start;
     public int End { get; } = end;
+
+
+    public override string ToString() => SubString;
 }
 
 

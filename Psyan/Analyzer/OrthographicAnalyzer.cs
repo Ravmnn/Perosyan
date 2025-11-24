@@ -127,4 +127,14 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
         return false;
     }
+
+
+
+
+    public static Word GetWord(Token token)
+        => new Word(token, new OrthographicAnalyzer(token.Lexeme).Split());
+
+
+    public static IEnumerable<Word> GetWords(IEnumerable<Token> tokens)
+        => from token in tokens select GetWord(token);
 }

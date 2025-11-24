@@ -14,6 +14,8 @@ class Program
 {
     public static async Task Main(string[] args)
     {
+        args = ["-s", "mi ni kome pa na"];
+
         var root = new PerosyanRootCommand(args);
 
         await root.Result.InvokeAsync();
@@ -46,30 +48,11 @@ class Program
     {
         var source = options.Source ?? File.ReadAllText(options.SourceFile!);
         var tokens = new Lexer(source).Tokenize();
+        var words = OrthographicAnalyzer.GetWords(tokens);
 
-        var wordsSyllables = new List<Syllable[]>();
+        var structures = new SyntacticAnalyzer(words).GetStructures();
 
-        foreach (var token in tokens)
-        {
-            var syllables = new OrthographicAnalyzer(token.Lexeme).Split();
 
-            foreach (var syllable in syllables)
-                if (syllable is InvalidSyllable invalid)
-                {
-                    Log.Error(invalid);
-                    return;
-                }
-
-            wordsSyllables.Add(syllables);
-        }
-
-        foreach (var wordSyllable in wordsSyllables)
-        {
-            for (var i = 0; i < wordSyllable.Length; i++)
-                AnsiConsole.Write($"{wordSyllable[i].SubString}{(i + 1 < wordSyllable.Length ? "-" : "")}");
-
-            AnsiConsole.WriteLine();
-        }
     }
 
 

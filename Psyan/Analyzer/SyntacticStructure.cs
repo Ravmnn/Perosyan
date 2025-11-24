@@ -3,8 +3,19 @@ namespace Psyan.Analyzer;
 
 
 
-public abstract class SyntacticStructure
+public abstract class SyntacticStructure(Word[] words)
 {
-    public Token Start { get; }
-    public Token End { get; }
+    public virtual Word[] Words { get; } = words;
+
+    public Word Start => Words.First();
+    public Word End => Words.Last();
+}
+
+
+
+
+public class InvalidSyntacticStructure(Word[] words, string errorMessage)
+    : SyntacticStructure(words)
+{
+    public string ErrorMessage { get; } = errorMessage;
 }

@@ -3,7 +3,7 @@ namespace Psyan.Analyzer;
 
 
 
-public class SyntacticAnalyzer(IEnumerable<Token> tokens)
+public class SyntacticAnalyzer(IEnumerable<Word> words)
 {
     private uint _current;
 
@@ -13,67 +13,105 @@ public class SyntacticAnalyzer(IEnumerable<Token> tokens)
     public string[] Splitters { get; } = ["!", "?", "."];
 
 
-    public Token[] Tokens { get; set; } = tokens.ToArray();
-
-    public List<ISyntacticStructureBuilder> Builders { get; set; } = [];
+    public Word[] Words { get; set; } = words.ToArray();
 
 
+    private readonly List<SyntacticStructure> _structures = [];
+
+    public List<ISyntacticStructureBuilder> Builders { get; set; } = [
+        new NounStructureBuilder(),
+        new PronounStructureBuilder(),
+        new VerbalStructureBuilder()
+    ];
 
 
-    public IEnumerable<SyntacticStructure> Analyze()
+
+
+    public IEnumerable<SyntacticStructure> GetStructures()
     {
-        var structures = new List<SyntacticStructure>();
+        _structures.Clear();
 
         while (!AtEnd())
         {
+            var success = false;
+
             foreach (var builder in Builders)
                 if (builder.Match(this))
-                    structures.Add(builder.Build(this));
+                {
+                    _structures.Add(builder.Build(this));
+                    success = true;
+                    break;
+                }
 
-            var start = Peek();
-            AdvanceUntilSplitter();
-            var end = Peek();
+            if (!success)
+                AddInvalidStructure(_structures);
         }
 
-        return structures;
+        return _structures;
     }
 
 
-    private void AdvanceUntilSplitter()
+    private void AddInvalidStructure(List<SyntacticStructure> structures)
+        => structures.Add(new InvalidSyntacticStructure(AdvanceSentence(), "Invalid syntactic structure."));
+
+
+
+
+    public SyntacticStructure? ConsumeLastStructure()
     {
-        while (Peek() is var token && !Splitters.Contains(token.Lexeme))
-            Advance();
+        var structure = _structures.LastOrDefault();
+
+        if (structure is not null)
+            _structures.Remove(structure);
+
+        return structure;
     }
 
 
 
 
-    public Token Advance()
+    private Word[] AdvanceSentence()
+    {
+        var words = new List<Word>();
+
+        while (Peek() is var word && !Splitters.Contains(word.String))
+        {
+            words.Add(word);
+            Advance();
+        }
+
+        return words.ToArray();
+    }
+
+
+
+
+    public Word Advance()
     {
         if (AtEnd())
             return Previous();
 
-        return Tokens[_current++];
+        return Words[_current++];
     }
 
 
-    public Token Peek()
-        => !AtEnd() ? Tokens[_current] : Previous();
+    public Word Peek()
+        => !AtEnd() ? Words[_current] : Previous();
 
 
-    public Token Previous()
-        => Tokens[_current - 1];
+    public Word Previous()
+        => Words[_current - 1];
 
 
-    public Token Next()
+    public Word Next()
     {
-        if (_current + 1 >= Tokens.Length)
+        if (_current + 1 >= Words.Length)
             return Peek();
 
-        return Tokens[_current + 1];
+        return Words[_current + 1];
     }
 
 
     public bool AtEnd()
-        => _current >= Tokens.Length;
+        => _current >= Words.Length;
 }
