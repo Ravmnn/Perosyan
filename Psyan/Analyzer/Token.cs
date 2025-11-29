@@ -12,6 +12,9 @@ public enum TokenType
 }
 
 
-public readonly record struct TokenLocation(int Start, int End);
+public readonly record struct TokenLocation(int Start, int End)
+{
+    public int Length => End - Start;
+}
 
 public readonly record struct Token(string Lexeme, TokenLocation Location, TokenType Type);

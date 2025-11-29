@@ -3,18 +3,17 @@ namespace Psyan.Analyzer;
 
 
 
-public readonly struct Word(Token token, Syllable[] syllables)
+public readonly record struct Word(Token Token, Syllable[] Syllables)
 {
-    public Token Token { get; } = token;
     public string String => Token.Lexeme;
 
-    public Syllable[] Syllables { get; } = syllables;
 
 
     public InvalidSyllable? Error
         => Syllables.FirstOrDefault(syllable => syllable is InvalidSyllable) as InvalidSyllable;
 
     public bool HasError => Error is not null;
+    public bool IsPunctuation => String is "," or "." or ";";
 
 
 

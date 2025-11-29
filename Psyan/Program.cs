@@ -1,6 +1,4 @@
-﻿using Spectre.Console;
-
-using PrettyPrompt;
+﻿using PrettyPrompt;
 
 using Psyan.Analyzer;
 
@@ -14,7 +12,7 @@ class Program
 {
     public static async Task Main(string[] args)
     {
-        args = ["-s", "mi ni kome pa na"];
+        //args = "-i".Split(' ');
 
         var root = new PerosyanRootCommand(args);
 
@@ -50,7 +48,7 @@ class Program
         var tokens = new Lexer(source).Tokenize();
         var words = OrthographicAnalyzer.GetWords(tokens);
 
-        var structures = new SyntacticAnalyzer(words).GetStructures();
+        var structures = new Parser(words.ToArray()).Parse();
 
 
     }

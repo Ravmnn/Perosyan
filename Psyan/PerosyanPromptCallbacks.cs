@@ -9,27 +9,27 @@ namespace Psyan;
 
 
 
-public class PerosyanPromptCallbacks : PromptCallbacks
+public class PerosyanPromptCallbacks : PromptCallbacks, ISyntacticStructureProcessor
 {
-    protected override Task<IReadOnlyCollection<FormatSpan>> HighlightCallbackAsync(string text, CancellationToken cancellationToken)
+    private List<FormatSpan> _spans = [];
+
+    // TODO: add number and punctuation support.
+
+
+
+
+    protected override Task<IReadOnlyCollection<FormatSpan>> HighlightCallbackAsync(string text, CancellationToken _)
     {
-        var spans = new List<FormatSpan>();
+        _spans = [];
 
         var tokens = new Lexer(text).Tokenize();
-        var orthography = new OrthographicAnalyzer();
+        var words = OrthographicAnalyzer.GetWords(tokens);
+        var structures = new Parser(words.ToArray()).Parse();
 
-        foreach (var token in tokens)
-        {
-            if (ProcessedPunctuation(spans, token) || ProcessedNumber(spans, token))
-                continue;
+        foreach (var structure in structures)
+            Process(structure);
 
-            orthography.Word = token.Lexeme;
-
-            if (orthography.GetOrthographyErrorIndex() is { } errorIndex)
-                AddErrorFormatting(spans, token, errorIndex);
-        }
-
-        return Task.FromResult<IReadOnlyCollection<FormatSpan>>(spans.AsReadOnly());
+        return Task.FromResult<IReadOnlyCollection<FormatSpan>>(_spans.AsReadOnly());
     }
 
 
@@ -70,4 +70,52 @@ public class PerosyanPromptCallbacks : PromptCallbacks
 
         spans.Add(new FormatSpan(absoluteIndex, 1, new ConsoleFormat(AnsiColor.Red, Underline: true)));
     }
+
+
+
+
+    public void Process(SyntacticStructure structure)
+        => structure.Process(this);
+
+
+    public void ProcessVerb(Verb verb)
+    {
+        verb.Subject?.Process(this);
+
+        AddSpan(verb.MoodWord.Token.Location, AnsiColor.Green);
+        AddSpan(verb.VerbNounWord.Token.Location, AnsiColor.Blue);
+
+        if (verb.TenseWord is not null)
+            AddSpan(verb.TenseWord.Value.Token.Location, AnsiColor.Magenta);
+
+        verb.Destination?.Process(this);
+        verb.Object?.Process(this);
+    }
+
+
+    public void ProcessPronoun(Pronoun pronoun)
+    {
+        AddSpan(pronoun.Word.Token.Location, AnsiColor.Yellow);
+    }
+
+
+    public void ProcessNoun(Noun noun)
+    {
+        AddSpan(noun.Word.Token.Location, AnsiColor.Blue);
+
+        if (noun.Adjective is not null)
+            AddSpan(noun.Adjective.Value.Token.Location, AnsiColor.BrightCyan);
+    }
+
+
+    public void ProcessInvalid(Invalid invalid)
+    {
+        AddSpan(invalid.Word.Token.Location, AnsiColor.Red);
+    }
+
+
+
+
+    private void AddSpan(TokenLocation location, AnsiColor color)
+        => _spans.Add(new FormatSpan(location.Start, location.Length, color));
 }
