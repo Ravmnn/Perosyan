@@ -9,7 +9,7 @@ namespace Psyan;
 
 
 
-public class PerosyanPromptCallbacks : PromptCallbacks, ISyntacticStructureProcessor
+public class PisanPromptCallbacks : PromptCallbacks, ISyntacticStructureProcessor
 {
     private List<FormatSpan> _spans = [];
 
