@@ -50,7 +50,8 @@ class Program
 
         var structures = new Parser(words.ToArray()).Parse();
 
-
+        // TODO: once you got a minimal usable version, add ability to print the whole analysis data as JSON to the stdout:
+        // Passive mode will be the method that outputs that JSON to stdout
     }
 
 

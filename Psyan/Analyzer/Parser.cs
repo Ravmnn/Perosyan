@@ -20,9 +20,30 @@ public class Parser(Word[] words)
         var structures = new List<SyntacticStructure>();
 
         while (!AtEnd())
-            structures.Add(ParseVerb());
+            structures.Add(ParseConjunction());
 
         return structures;
+    }
+
+
+
+
+    private SyntacticStructure ParseConjunction()
+    {
+        var left = ParseVerb();
+
+        if (!Match(Conjunction.IsConjunctionSplitter, out var conjunctionSplitter))
+            return left;
+
+        if (!Match(Conjunction.IsConjunction, out var conjunction))
+            return left;
+
+        if (!Match(Conjunction.IsConjunctionLinkSplitter, out var conjunctionLinkSplitter))
+            return left;
+
+        var right = ParseVerb();
+
+        return new Conjunction(left, right, conjunction, conjunctionSplitter, conjunctionLinkSplitter);
     }
 
 
