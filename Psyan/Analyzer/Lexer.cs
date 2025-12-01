@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+
+
 namespace Psyan.Analyzer;
 
 
@@ -8,7 +12,7 @@ public class Lexer(string source)
     private int _start, _end;
 
 
-    private string Source { get; set; } = source;
+    public string Source { get; set; } = source;
 
 
 

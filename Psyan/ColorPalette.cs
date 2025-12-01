@@ -1,5 +1,3 @@
-using PrettyPrompt.Highlighting;
-
 using Spectre.Console;
 
 
@@ -10,26 +8,20 @@ namespace Psyan;
 
 public static class ColorPalette
 {
-    public static AnsiColor Invalid { get; } = ToAnsiColor(Color.Red3);
-    public static AnsiColor InvalidOrthography { get; } = ToAnsiColor(Color.Red3_1);
+    public static Style Invalid => Color.Red3;
+    public static Style InvalidOrthography => Color.Red3_1;
 
-    public static AnsiColor Punctuaction { get; } = ToAnsiColor(Color.Gray62);
+    public static Style Punctuaction => Color.Gray62;
 
-    public static AnsiColor Noun { get; } = ToAnsiColor(Color.SteelBlue1);
-    public static AnsiColor Adjective { get; } = ToAnsiColor(Color.SteelBlue1_1);
-    public static AnsiColor Pronoun { get; } = ToAnsiColor(Color.Gold3_1);
+    public static Style Noun => Color.SteelBlue1;
+    public static Style Adjective => Color.SteelBlue1_1;
+    public static Style Pronoun => Color.Gold3_1;
 
-    public static AnsiColor VerbMood { get; } = ToAnsiColor(Color.DarkOliveGreen2);
-    public static AnsiColor VerbNoun { get; } = ToAnsiColor(Color.SpringGreen2_1);
-    public static AnsiColor VerbTense { get; } = ToAnsiColor(Color.Violet);
-    public static AnsiColor VerbDestinationSpecifier { get; } = ToAnsiColor(Color.Honeydew2);
-    public static AnsiColor VerbObjectSpecifier { get; } = ToAnsiColor(Color.Honeydew2);
+    public static Style VerbMood => Color.DarkOliveGreen2;
+    public static Style VerbNoun => Color.SpringGreen2_1;
+    public static Style VerbTense => Color.Violet;
+    public static Style VerbDestinationSpecifier => Color.Honeydew2;
+    public static Style VerbObjectSpecifier => Color.Honeydew2;
 
-    public static AnsiColor Conjunction { get; } = ToAnsiColor(Color.HotPink_1);
-
-
-
-
-    public static AnsiColor ToAnsiColor(Color color)
-        => AnsiColor.Rgb(color.R, color.G, color.B);
+    public static Style Conjunction => Color.HotPink_1;
 }

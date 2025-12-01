@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+
+using Psyan.Analyzer.Structures;
+
+
 namespace Psyan.Analyzer;
 
 
@@ -20,7 +26,13 @@ public class Parser(Word[] words)
         var structures = new List<SyntacticStructure>();
 
         while (!AtEnd())
-            structures.Add(ParseConjunction());
+        {
+            var structure = ParseConjunction();
+            structures.Add(structure);
+
+            if (structure is Expect)
+                Advance();
+        }
 
         return structures;
     }
@@ -56,17 +68,14 @@ public class Parser(Word[] words)
         if (!Match(Verb.IsMood, out var moodWord))
             return subject;
 
-        var nounStructure = ParseNoun();
-
-        if (nounStructure is not Noun verbNounWord)
-            return nounStructure;
+        var verbNoun = ParseNoun();
 
         MatchOrNull(Verb.IsTense, out var tenseWord);
 
         var (destinationSpecifier, destination) = ParseVerbArgument("ke");
         var (objectSpecifier, @object) = ParseVerbArgument("li");
 
-        return new Verb(subject, moodWord, verbNounWord.Word, tenseWord, destinationSpecifier, destination, objectSpecifier, @object);
+        return new Verb(subject, moodWord, verbNoun, tenseWord, destinationSpecifier, destination, objectSpecifier, @object);
     }
 
 
@@ -83,24 +92,24 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseNounOrPronoun()
+    private SyntacticStructure ParseNounOrPronoun(bool advanceIfInvalid = true)
     {
-        if (ParseNoun() is Noun noun)
+        if (ParseNoun(false) is Noun noun)
             return noun;
 
-        if (ParsePronoun() is Pronoun pronoun)
+        if (ParsePronoun(false) is Pronoun pronoun)
             return pronoun;
 
-        return AdvanceInvalid("Expect noun or pronoun");
+        return CreateExpectAndAdvance("Expect noun or pronoun", advanceIfInvalid);
     }
 
 
 
 
-    private SyntacticStructure ParsePronoun()
+    private SyntacticStructure ParsePronoun(bool advanceIfInvalid = true)
     {
         if (!Match(Pronoun.IsPronoun, out var pronoun))
-            return CreateInvalid("Invalid pronoun");
+            return CreateExpectAndAdvance("Expect pronoun", advanceIfInvalid);
 
         return new Pronoun(pronoun);
     }
@@ -108,45 +117,71 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseNoun()
+    private SyntacticStructure ParseNoun(bool advanceIfInvalid = true)
     {
-        var noun = ParseSingleNoun();
-        var adjective = ParseSingleNoun();
+        var expect = CreateExpect("Expect noun");
 
-        if (noun is null)
-            return CreateInvalid("Invalid noun");
+        var noun = ParseSingleNoun(advanceIfInvalid);
+        var isInvalid = noun is null || noun.Word.HasError;
 
-        return new Noun(noun.Word, adjective?.Word);
+        if (isInvalid)
+            return expect;
+
+        var adjective = ParseSingleNoun(false);
+
+        return new Noun(noun!.Word, adjective?.Word);
     }
 
 
-    private Noun? ParseSingleNoun()
+    private Noun? ParseSingleNoun(bool advanceIfInvalid = true)
     {
-        if (!Match(Noun.IsNoun, out var noun))
+        var word = ParseSingleWord(Noun.IsNoun, advanceIfInvalid);
+
+        if (word is not null)
+            return new Noun(word.Value);
+
+        return null;
+    }
+
+
+    private Word? ParseSingleWord(Func<Word, bool> predicate, bool advanceIfInvalid = true)
+    {
+        if (!Match(predicate, out var word))
+        {
+            if (advanceIfInvalid)
+                Advance();
+
             return null;
+        }
 
-        return new Noun(noun);
+        return word;
     }
 
 
 
 
-    private Invalid CreateInvalid(string message)
-        => new Invalid(Peek(), message);
+    private Expect CreateExpect(string message)
+        => new Expect(Previous(), Peek(), message, AtEnd());
 
 
-    private Invalid AdvanceInvalid(string message)
+    private Expect CreateExpectAndAdvance(string message, bool advance = true)
     {
-        Advance();
-        return CreateInvalid(message);
+        var expect = CreateExpect(message);
+
+        if (advance)
+            Advance();
+
+        return expect;
     }
+
+
 
 
     private bool Match(Func<Word, bool> predicate, out Word word)
     {
-        if (predicate(Peek()))
+        if (!AtEnd() && predicate(Peek()!.Value))
         {
-            word = Advance();
+            word = Advance()!.Value;
             return true;
         }
 
@@ -157,7 +192,7 @@ public class Parser(Word[] words)
 
     private bool MatchOrNull(Func<Word, bool> predicate, out Word? word)
     {
-        if (predicate(Peek()))
+        if (!AtEnd() && predicate(Peek()!.Value))
         {
             word = Advance();
             return true;
@@ -171,32 +206,23 @@ public class Parser(Word[] words)
 
 
 
-    private bool Check(TokenType token)
+    private Word? Advance()
     {
         if (AtEnd())
-            return false;
-
-        return Peek().Token.Type == token;
-    }
-
-
-    private Word Advance()
-    {
-        if (AtEnd())
-            return Previous();
+            return null;
 
         return Words[_current++];
     }
 
 
-    private Word Peek()
-        => !AtEnd() ? Words[_current] : Previous();
+    private Word? Peek()
+        => !AtEnd() ? Words[_current] : null;
 
 
-    private Word Previous(int amount = 1)
+    private Word? Previous(int amount = 1)
     {
         if (_current <= amount - 1)
-            return Peek();
+            return null;
 
         return Words[_current - amount];
     }

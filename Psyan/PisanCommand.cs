@@ -1,4 +1,9 @@
-using PrettyPrompt;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using RadLine;
 
 using Spectre.Console.Cli;
 
@@ -32,7 +37,7 @@ public class PisanCommand : Command<PisanCommandSettings>
     {
         if (settings.Interactive)
         {
-            RunInteractive(settings).Wait(cancellationToken);
+            RunInteractive(settings, cancellationToken).Wait(cancellationToken);
             return 0;
         }
 
@@ -62,12 +67,9 @@ public class PisanCommand : Command<PisanCommandSettings>
 
 
 
-    public static async Task RunInteractive(PisanCommandSettings settings)
+    public static async Task RunInteractive(PisanCommandSettings settings, CancellationToken cancellationToken)
     {
-        var prompt = new Prompt(callbacks: new PisanPromptCallbacks());
-
-        var result = await prompt.ReadLineAsync();
-
-        RunPassive(result.Text, settings);
+        var editor = new LineEditor { Highlighter = new PisanLineEditorHighlighter() };
+        await editor.ReadLine(cancellationToken);
     }
 }
