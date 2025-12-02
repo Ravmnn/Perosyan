@@ -9,7 +9,6 @@ using Boolean = Psyan.Analyzer.Structures.Boolean;
 
 namespace Psyan.Analyzer;
 
-// TODO: "fi so, ..." for probability
 // TODO: add prepositions
 
 
@@ -32,7 +31,7 @@ public class Parser(Word[] words)
         var structures = new List<SyntacticStructure>();
 
         while (!AtEnd())
-            structures.Add(ParseConditional());
+            structures.Add(ParseProbability());
 
         return structures;
     }
@@ -40,16 +39,26 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseConditional()
+    private SyntacticStructure ParseProbability()
     {
-        var ifParticle = ParseConditionalParticle(ConditionalParticle.Type.ConditionParticle);
-
-        if (ifParticle is Expect)
+        if (ParseConditionalParticle(ConditionalParticle.Type.ConditionParticle) is not ConditionalParticle @if)
             return ParseConjunction();
 
+        if (ParseConditionalParticle(ConditionalParticle.Type.CauseParticle) is not ConditionalParticle so)
+            return ParseConditional(@if);
+
+        var splitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
+        var sentence = ParseConjunction();
+
+        return new Probability(@if, so, splitter, sentence);
+    }
+
+
+    private SyntacticStructure ParseConditional(ConditionalParticle @if)
+    {
         var conjunctionSentence = ParseConjunction(ConjunctionParticle.Type.CausalForward);
 
-        return new Conditional(ifParticle, conjunctionSentence);
+        return new Conditional(@if, conjunctionSentence);
     }
 
 

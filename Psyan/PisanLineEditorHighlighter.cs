@@ -62,6 +62,13 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         => structure.Process(this);
 
 
+    public void ProcessProbability(Probability probability)
+    {
+        Process(probability.IfParticle);
+        Process(probability.SoParticle);
+        Process(probability.Splitter);
+        Process(probability.Sentence);
+    }
 
 
     public void ProcessConditional(Conditional conditional)

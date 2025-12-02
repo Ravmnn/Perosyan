@@ -5,6 +5,7 @@ namespace Psyan.Analyzer.Structures;
 
 public interface ISyntacticStructureProcessor
 {
+    void ProcessProbability(Probability probability);
     void ProcessConditional(Conditional conditional);
     void ProcessConditionalParticle(ConditionalParticle particle);
     void ProcessConjunction(Conjunction conjunction);
