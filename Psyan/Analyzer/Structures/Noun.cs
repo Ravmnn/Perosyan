@@ -19,4 +19,8 @@ public class Noun(Word word, Word? adjective = null) : SyntacticStructure
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessNoun(this);
+
+
+    public override Word BaseWord()
+        => Word;
 }

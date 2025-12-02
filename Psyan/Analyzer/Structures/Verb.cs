@@ -6,25 +6,31 @@ namespace Psyan.Analyzer.Structures;
 
 
 
-public class Verb(SyntacticStructure? subject, Word moodWord, SyntacticStructure? verbNoun, Word? tenseWord = null,
-    Word? destinationSpecifier = null, SyntacticStructure? destination = null, Word? objectSpecifier = null, SyntacticStructure? @object = null)
-    : SyntacticStructure
+public class Verb(
+    SyntacticStructure? subject,
+    SyntacticStructure moodWord,
+    SyntacticStructure? verbNoun,
+    SyntacticStructure? tenseWord = null,
+    SyntacticStructure? destinationSpecifier = null,
+    SyntacticStructure? destination = null,
+    SyntacticStructure? objectSpecifier = null,
+    SyntacticStructure? @object = null
+) : SyntacticStructure
 {
     public SyntacticStructure? Subject { get; } = subject;
-    public Word MoodWord { get; } = moodWord;
+    public SyntacticStructure MoodWord { get; } = moodWord;
     public SyntacticStructure? VerbNoun { get; } = verbNoun;
-    public Word? TenseWord { get; } = tenseWord;
+    public SyntacticStructure? TenseWord { get; } = tenseWord;
 
-    public MoodType Mood { get; } = MoodTypeOf(moodWord) ?? throw new ArgumentException("Invalid mood word");
-    public TenseType Tense { get; } = TenseTypeOf(tenseWord) ?? throw new ArgumentException("Invalid tense word");
+    public MoodType Mood { get; } = MoodTypeOf(moodWord.BaseWord()) ?? throw new ArgumentException("Invalid mood word");
+    public TenseType Tense { get; } = TenseTypeOf(tenseWord?.BaseWord()) ?? throw new ArgumentException("Invalid tense word");
 
     // TODO: add aspects
-    // TODO: add conjunctions (+ punctuation)
 
-    public Word? DestinationSpecifier { get; } = destinationSpecifier;
+    public SyntacticStructure? DestinationSpecifier { get; } = destinationSpecifier;
     public SyntacticStructure? Destination { get; } = destination;
 
-    public Word? ObjectSpecifier { get; } = objectSpecifier;
+    public SyntacticStructure? ObjectSpecifier { get; } = objectSpecifier;
     public SyntacticStructure? Object { get; } = @object;
 
 
@@ -79,4 +85,8 @@ public class Verb(SyntacticStructure? subject, Word moodWord, SyntacticStructure
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessVerb(this);
+
+
+    public override Word BaseWord()
+        => MoodWord.BaseWord();
 }

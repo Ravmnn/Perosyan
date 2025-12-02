@@ -56,4 +56,8 @@ public class Conjunction(SyntacticStructure left, SyntacticStructure right, Word
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessConjunction(this);
+
+
+    public override Word BaseWord()
+        => ConjunctionWord;
 }

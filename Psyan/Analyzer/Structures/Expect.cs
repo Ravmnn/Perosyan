@@ -16,4 +16,8 @@ public class Expect(Word? after, Word? got, string message, bool atEnd = false) 
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessExpect(this);
+
+
+    public override Word BaseWord()
+        => After ?? Got ?? default;
 }

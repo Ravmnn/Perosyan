@@ -26,13 +26,7 @@ public class Parser(Word[] words)
         var structures = new List<SyntacticStructure>();
 
         while (!AtEnd())
-        {
-            var structure = ParseConjunction();
-            structures.Add(structure);
-
-            if (structure is Expect)
-                Advance();
-        }
+            structures.Add(ParseConjunction());
 
         return structures;
     }
@@ -64,29 +58,45 @@ public class Parser(Word[] words)
     private SyntacticStructure ParseVerb()
     {
         var subject = ParseNounOrPronoun();
+        var moodParticle = ParseVerbParticle(VerbParticle.Type.MoodSpecifier);
 
-        if (!Match(Verb.IsMood, out var moodWord))
+        if (moodParticle is Expect)
             return subject;
 
         var verbNoun = ParseNoun();
 
-        MatchOrNull(Verb.IsTense, out var tenseWord);
+        var tenseParticle = ParseVerbParticleOrNull(VerbParticle.Type.TenseSpecifier);
 
-        var (destinationSpecifier, destination) = ParseVerbArgument("ke");
-        var (objectSpecifier, @object) = ParseVerbArgument("li");
+        var (destinationParticle, destination) = ParseVerbArgument(VerbParticle.Type.DestinationSpecifier);
+        var (objectParticle, @object) = ParseVerbArgument(VerbParticle.Type.ObjectSpecifier);
 
-        return new Verb(subject, moodWord, verbNoun, tenseWord, destinationSpecifier, destination, objectSpecifier, @object);
+        return new Verb(subject, moodParticle, verbNoun, tenseParticle, destinationParticle, destination, objectParticle, @object);
     }
 
 
-    private (Word?, SyntacticStructure?) ParseVerbArgument(string specifier)
+    private SyntacticStructure ParseVerbParticle(VerbParticle.Type particleType)
     {
-        if (!Match(word => word.Token.Lexeme == specifier, out var specifierWord))
-            return (null, null);
+        if (!Match(VerbParticle.IsVerbParticle, out var word, false) || VerbParticle.TypeOf(word) != particleType)
+            return CreateExpectAndAdvance($"Expect verb particle ({particleType})", false);
 
-        var @object = ParseNounOrPronoun();
+        Advance();
+        return new VerbParticle(word);
+    }
 
-        return (specifierWord, @object);
+
+    private SyntacticStructure? ParseVerbParticleOrNull(VerbParticle.Type particleType)
+        => ParseVerbParticle(particleType) as VerbParticle;
+
+
+    private (SyntacticStructure?, SyntacticStructure?) ParseVerbArgument(VerbParticle.Type particleType)
+    {
+        var particle = ParseVerbParticleOrNull(particleType);
+        SyntacticStructure? @object = null;
+
+        if (particle is not null)
+            @object = ParseNounOrPronoun();
+
+        return (particle, @object);
     }
 
 
@@ -177,11 +187,15 @@ public class Parser(Word[] words)
 
 
 
-    private bool Match(Func<Word, bool> predicate, out Word word)
+    private bool Match(Func<Word, bool> predicate, out Word word, bool advance = true)
     {
         if (!AtEnd() && predicate(Peek()!.Value))
         {
-            word = Advance()!.Value;
+            word = Peek()!.Value;
+
+            if (advance)
+                Advance();
+
             return true;
         }
 

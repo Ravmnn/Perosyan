@@ -42,4 +42,8 @@ public class Pronoun(Word pronoun) : SyntacticStructure
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessPronoun(this);
+
+
+    public override Word BaseWord()
+        => Word;
 }

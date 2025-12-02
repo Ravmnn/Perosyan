@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -61,51 +62,49 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     public void ProcessConjunction(Conjunction conjunction)
     {
         Process(conjunction.Left);
-        AddWord(conjunction.ConjunctionSplitter.Token.Location, ColorPalette.Punctuaction);
+        AddWord(conjunction.ConjunctionSplitter, ColorPalette.Punctuaction);
 
-        AddWord(conjunction.ConjunctionWord.Token.Location, ColorPalette.Conjunction);
-        AddWord(conjunction.ConjunctionLinkSplitter.Token.Location, ColorPalette.Punctuaction);
+        AddWord(conjunction.ConjunctionWord, ColorPalette.Conjunction);
+        AddWord(conjunction.ConjunctionLinkSplitter, ColorPalette.Punctuaction);
 
         Process(conjunction.Right);
     }
 
 
+
+
     public void ProcessVerb(Verb verb)
     {
         verb.Subject?.Process(this);
-
-        AddWord(verb.MoodWord.Token.Location, ColorPalette.VerbMood);
-
+        verb.MoodWord.Process(this);
         verb.VerbNoun?.Process(this);
-
-        if (verb.TenseWord is not null)
-            AddWord(verb.TenseWord.Value.Token.Location, ColorPalette.VerbTense);
-
-        if (verb.DestinationSpecifier is not null)
-            AddWord(verb.DestinationSpecifier.Value.Token.Location, ColorPalette.VerbDestinationSpecifier);
-
+        verb.TenseWord?.Process(this);
+        verb.DestinationSpecifier?.Process(this);
         verb.Destination?.Process(this);
-
-        if (verb.ObjectSpecifier is not null)
-            AddWord(verb.ObjectSpecifier.Value.Token.Location, ColorPalette.VerbObjectSpecifier);
-
+        verb.ObjectSpecifier?.Process(this);
         verb.Object?.Process(this);
     }
 
 
+
+
     public void ProcessPronoun(Pronoun pronoun)
     {
-        AddWord(pronoun.Word.Token.Location, ColorPalette.Pronoun);
+        AddWord(pronoun.Word, ColorPalette.Pronoun);
     }
+
+
 
 
     public void ProcessNoun(Noun noun)
     {
-        AddWord(noun.Word.Token.Location, ColorPalette.Noun);
+        AddWord(noun.Word, ColorPalette.Noun);
 
         if (noun.Adjective is not null)
-            AddWord(noun.Adjective.Value.Token.Location, ColorPalette.Adjective);
+            AddWord(noun.Adjective, ColorPalette.Adjective);
     }
+
+
 
 
     public void ProcessExpect(Expect expect)
@@ -114,12 +113,40 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
             return;
 
         var color = expect.Got.Value.HasError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
-        AddWord(expect.Got.Value.Token.Location, color);
+        AddWord(expect.Got, color);
     }
 
 
 
 
-    private void AddWord(TokenLocation location, Style style)
-        => _spans.Add(new StyleSpan(location, style));
+    public void ProcessVerbParticle(VerbParticle particle)
+    {
+        var color = GetVerbParticleColor(particle);
+
+        AddWord(particle.Word, color);
+    }
+
+
+    private static Style GetVerbParticleColor(VerbParticle particle)
+    {
+        return particle.ParticleType switch
+        {
+            VerbParticle.Type.MoodSpecifier => ColorPalette.VerbMood,
+            VerbParticle.Type.TenseSpecifier => ColorPalette.VerbTense,
+            VerbParticle.Type.AspectSpecifier => Color.Black,
+            VerbParticle.Type.DestinationSpecifier => ColorPalette.VerbDestinationSpecifier,
+            VerbParticle.Type.ObjectSpecifier => ColorPalette.VerbObjectSpecifier,
+
+            _ => throw new InvalidOperationException("Invalid particle type at rendering")
+        };
+    }
+
+
+
+
+    private void AddWord(Word? word, Style style)
+    {
+        if (word is not null)
+            _spans.Add(new StyleSpan(word.Value.Token.Location, style));
+    }
 }
