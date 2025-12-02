@@ -5,9 +5,9 @@ namespace Psyan.Analyzer.Structures;
 
 
 
-public class VerbParticle(Word word) : Particle(word)
+public class VerbParticle(Word word) : Particle(word), IParticleValidator, IParticleFactory<VerbParticle>
 {
-    public Type ParticleType { get; } = TypeOf(word) ?? throw new ArgumentException("Invalid verb particle");
+    public Type ParticleType { get; } = (Type?)TypeOf(word) ?? throw new ArgumentException("Invalid verb particle");
 
 
 
@@ -22,14 +22,14 @@ public class VerbParticle(Word word) : Particle(word)
     }
 
 
-    public static Type? TypeOf(Word word) => word.String switch
+    public static int? TypeOf(Word word) => word.String switch
     {
-        not null when Verb.IsMood(word) => Type.MoodSpecifier,
-        not null when Verb.IsTense(word) => Type.TenseSpecifier,
-        not null when Verb.IsAspect(word) => Type.AspectSpecifier,
+        not null when Verb.IsMood(word) => (int)Type.MoodSpecifier,
+        not null when Verb.IsTense(word) => (int)Type.TenseSpecifier,
+        not null when Verb.IsAspect(word) => (int)Type.AspectSpecifier,
 
-        "ke" => Type.DestinationSpecifier,
-        "li" => Type.ObjectSpecifier,
+        "ke" => (int)Type.DestinationSpecifier,
+        "li" => (int)Type.ObjectSpecifier,
 
         _ => null
     };
@@ -43,4 +43,10 @@ public class VerbParticle(Word word) : Particle(word)
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessVerbParticle(this);
+
+
+
+
+    public static VerbParticle Create(Word word)
+        => new VerbParticle(word);
 }

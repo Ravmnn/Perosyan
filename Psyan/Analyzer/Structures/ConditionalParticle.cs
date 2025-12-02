@@ -5,9 +5,9 @@ namespace Psyan.Analyzer.Structures;
 
 
 
-public class ConditionalParticle(Word word) : Particle(word)
+public class ConditionalParticle(Word word) : Particle(word), IParticleValidator, IParticleFactory<ConditionalParticle>
 {
-    public Type ParticleType { get; } = TypeOf(word) ?? throw new ArgumentException("Invalid conditional particle");
+    public Type ParticleType { get; } = (Type?)TypeOf(word) ?? throw new ArgumentException("Invalid conditional particle");
 
 
 
@@ -19,10 +19,10 @@ public class ConditionalParticle(Word word) : Particle(word)
     }
 
 
-    public static Type? TypeOf(Word word) => word.String switch
+    public static int? TypeOf(Word word) => word.String switch
     {
-        "fi" => Type.ConditionParticle,
-        "so" => Type.CauseParticle,
+        "fi" => (int)Type.ConditionParticle,
+        "so" => (int)Type.CauseParticle,
 
         _ => null
     };
@@ -36,4 +36,10 @@ public class ConditionalParticle(Word word) : Particle(word)
 
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessConditionalParticle(this);
+
+
+
+
+    public static ConditionalParticle Create(Word word)
+        => new ConditionalParticle(word);
 }

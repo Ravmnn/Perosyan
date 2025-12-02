@@ -3,15 +3,25 @@ namespace Psyan.Analyzer.Structures;
 
 
 
+public interface IParticleValidator
+{
+    static abstract int? TypeOf(Word word);
+}
+
+
+public interface IParticleFactory<out T>
+{
+    static abstract T Create(Word word);
+}
+
+
+
+
 public abstract class Particle(Word word) : SyntacticStructure
 {
     public Word Word { get; } = word;
 
 
-
-
-    public static bool IsParticle(Word word)
-        => word.Syllables.Length <= 1 && !word.HasError;
 
 
     public override Word BaseWord()

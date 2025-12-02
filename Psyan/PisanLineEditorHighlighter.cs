@@ -42,8 +42,8 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         foreach (var structure in structures)
             Process(structure);
 
+        _spans = _spans.DistinctBy(span => span.Location.Start).ToList();
         _spans = _spans.OrderBy(span => span.Location.Start).Reverse().ToList();
-
 
 
         foreach (var span in _spans)
@@ -92,16 +92,16 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         Process(conjunction.Right);
     }
 
-    
-    
-    
+
+
+
     public void ProcessConjunctionParticle(ConjunctionParticle particle)
     {
         AddWord(particle.Word, ColorPalette.ConjunctionParticle);
     }
 
-    
-    
+
+
 
     public void ProcessVerb(Verb verb)
     {
@@ -167,17 +167,17 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     {
         AddWord(boolean.Word, ColorPalette.Boolean);
     }
-    
 
-    
-    
+
+
+
     public void ProcessPunctuationParticle(PunctuationParticle particle)
     {
         AddWord(particle.Word, ColorPalette.PunctuationParticle);
     }
 
-    
-    
+
+
 
     public void ProcessExpect(Expect expect)
     {

@@ -53,14 +53,8 @@ public class Parser(Word[] words)
     }
 
 
-    private SyntacticStructure ParseConditionalParticle(ConditionalParticle.Type particleType)
-    {
-        if (!Match(ConditionalParticle.IsConditionalParticle, out var word, false) || ConditionalParticle.TypeOf(word) != particleType)
-            return CreateExpect($"Expect conditional particle ({particleType})");
-
-        Advance();
-        return new ConditionalParticle(word);
-    }
+    private SyntacticStructure ParseConditionalParticle(ConditionalParticle.Type? particleType = null)
+        => ParseParticle<ConditionalParticle>("Expect conjunction particle", (int?)particleType);
 
 
 
@@ -69,14 +63,11 @@ public class Parser(Word[] words)
     {
         var left = ParseVerb();
 
-        var sentenceSplitter = ParsePunctuationParticle(PunctuationParticle.Type.SentenceSplitter);
+        if (ParsePunctuationParticle(PunctuationParticle.Type.SentenceSplitter) is not PunctuationParticle sentenceSplitter)
+            return left;
+
         var conjunction = ParseConjunctionParticle(conjunctionType);
         var conjunctionSplitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
-
-        // TODO: improve error logging. it's not working very well here
-
-        if (sentenceSplitter is Expect || conjunction is Expect || conjunctionSplitter is Expect)
-            return left;
 
         var right = ParseVerb();
 
@@ -84,17 +75,8 @@ public class Parser(Word[] words)
     }
 
 
-    private SyntacticStructure ParseConjunctionParticle(ConjunctionParticle.Type? conjunctionType = null)
-    {
-        if (!Match(ConjunctionParticle.IsConjunctionParticle, out var word, false))
-            return CreateExpect("Expect conjunction particle");
-
-        if (conjunctionType is not null && ConjunctionParticle.TypeOf(word) != conjunctionType)
-            return CreateExpect($"Expect conjunction particle ({conjunctionType})");
-
-        Advance();
-        return new ConjunctionParticle(word);
-    }
+    private SyntacticStructure ParseConjunctionParticle(ConjunctionParticle.Type? particleType = null)
+        => ParseParticle<ConjunctionParticle>("Expect conjunction particle", (int?)particleType);
 
 
 
@@ -102,9 +84,8 @@ public class Parser(Word[] words)
     private SyntacticStructure ParseVerb()
     {
         var subject = ParsePrimitive();
-        var moodParticle = ParseVerbParticle(VerbParticle.Type.MoodSpecifier);
 
-        if (moodParticle is Expect)
+        if (ParseVerbParticle(VerbParticle.Type.MoodSpecifier) is not VerbParticle moodParticle)
             return subject;
 
         var verbNoun = ParseNoun(true);
@@ -119,14 +100,8 @@ public class Parser(Word[] words)
     }
 
 
-    private SyntacticStructure ParseVerbParticle(VerbParticle.Type particleType)
-    {
-        if (!Match(VerbParticle.IsVerbParticle, out var word, false) || VerbParticle.TypeOf(word) != particleType)
-            return CreateExpect($"Expect verb particle ({particleType})");
-
-        Advance();
-        return new VerbParticle(word);
-    }
+    private SyntacticStructure ParseVerbParticle(VerbParticle.Type? particleType = null)
+        => ParseParticle<VerbParticle>("Expect verb particle", (int?)particleType);
 
 
     private SyntacticStructure? ParseVerbParticleOrNull(VerbParticle.Type particleType)
@@ -193,47 +168,7 @@ public class Parser(Word[] words)
 
     private Noun? ParseSingleNoun(bool advanceIfInvalid = true)
     {
-        var word = ParseSingleWord(Noun.IsNoun, advanceIfInvalid);
-
-        if (word is not null)
-            return new Noun(word.Value);
-
-        return null;
-    }
-
-
-
-
-    private SyntacticStructure ParseBoolean(bool advanceIfInvalid = true)
-    {
-        if (ParseSingleWord(Boolean.IsBoolean, advanceIfInvalid) is not { } boolean)
-            return CreateExpectAndAdvance("Expect boolean", advanceIfInvalid);
-
-        return new Boolean(boolean);
-    }
-
-
-
-
-    // TODO: maybe it's possible to create a generic method for particle parsing
-    private SyntacticStructure ParsePunctuationParticle(PunctuationParticle.Type? punctuationType = null)
-    {
-        if (!Match(PunctuationParticle.IsPunctuationParticle, out var word, false))
-            return CreateExpect("Expect punctuation particle");
-
-        if (punctuationType is not null && PunctuationParticle.TypeOf(word) != punctuationType)
-            return CreateExpect($"Expect punctuation particle ({punctuationType})");
-
-        Advance();
-        return new PunctuationParticle(word);
-    }
-
-
-
-
-    private Word? ParseSingleWord(Func<Word, bool> predicate, bool advanceIfInvalid = true)
-    {
-        if (!Match(predicate, out var word))
+        if (!Match(Noun.IsNoun, out var word))
         {
             if (advanceIfInvalid)
                 Advance();
@@ -241,7 +176,40 @@ public class Parser(Word[] words)
             return null;
         }
 
-        return word;
+        return new Noun(word);
+    }
+
+
+
+
+    private SyntacticStructure ParseBoolean(bool advanceIfInvalid = true)
+    {
+        if (!Match(Boolean.IsBoolean, out var word))
+            return CreateExpectAndAdvance("Expect boolean", advanceIfInvalid);
+
+        return new Boolean(word);
+    }
+
+
+
+
+    private SyntacticStructure ParsePunctuationParticle(PunctuationParticle.Type? punctuationType = null)
+        => ParseParticle<PunctuationParticle>("Expect punctuation particle", (int?)punctuationType);
+
+
+
+
+    private SyntacticStructure ParseParticle<T>(string message, int? typeId = null)
+        where T : SyntacticStructure, IParticleValidator, IParticleFactory<T>
+    {
+        if (!Match(word => T.TypeOf(word) is not null, out var particle, false))
+            return CreateExpect(message);
+
+        if (typeId is not null && T.TypeOf(particle) != typeId)
+            return CreateExpect(message);
+
+        Advance();
+        return T.Create(particle);
     }
 
 
@@ -277,19 +245,6 @@ public class Parser(Word[] words)
         }
 
         word = default;
-        return false;
-    }
-
-
-    private bool MatchOrNull(Func<Word, bool> predicate, out Word? word)
-    {
-        if (!AtEnd() && predicate(Peek()!.Value))
-        {
-            word = Advance();
-            return true;
-        }
-
-        word = null;
         return false;
     }
 

@@ -13,7 +13,7 @@ public static class ColorPalette
 
     public static Style PunctuationParticle => Color.Gray62;
 
-    public static Style Boolean => Color.DarkOrange3_1;
+    public static Style Boolean => Color.LightSlateBlue;
     public static Style Noun => Color.SteelBlue1;
     public static Style Adjective => Color.SteelBlue1_1;
     public static Style Pronoun => Color.Gold3_1;
