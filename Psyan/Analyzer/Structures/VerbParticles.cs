@@ -26,6 +26,7 @@ public class VerbParticle(Word word) : Particle(word)
     {
         not null when Verb.IsMood(word) => Type.MoodSpecifier,
         not null when Verb.IsTense(word) => Type.TenseSpecifier,
+        not null when Verb.IsAspect(word) => Type.AspectSpecifier,
 
         "ke" => Type.DestinationSpecifier,
         "li" => Type.ObjectSpecifier,

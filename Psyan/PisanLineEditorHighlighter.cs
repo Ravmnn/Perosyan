@@ -76,44 +76,14 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     public void ProcessVerb(Verb verb)
     {
         verb.Subject?.Process(this);
-        verb.MoodWord.Process(this);
+        verb.MoodParticle.Process(this);
         verb.VerbNoun?.Process(this);
-        verb.TenseWord?.Process(this);
-        verb.DestinationSpecifier?.Process(this);
+        verb.TenseParticle?.Process(this);
+        verb.AspectParticle?.Process(this);
+        verb.DestinationParticle?.Process(this);
         verb.Destination?.Process(this);
-        verb.ObjectSpecifier?.Process(this);
+        verb.ObjectParticle?.Process(this);
         verb.Object?.Process(this);
-    }
-
-
-
-
-    public void ProcessPronoun(Pronoun pronoun)
-    {
-        AddWord(pronoun.Word, ColorPalette.Pronoun);
-    }
-
-
-
-
-    public void ProcessNoun(Noun noun)
-    {
-        AddWord(noun.Word, ColorPalette.Noun);
-
-        if (noun.Adjective is not null)
-            AddWord(noun.Adjective, ColorPalette.Adjective);
-    }
-
-
-
-
-    public void ProcessExpect(Expect expect)
-    {
-        if (expect.Got is null)
-            return;
-
-        var color = expect.Got.Value.HasError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
-        AddWord(expect.Got, color);
     }
 
 
@@ -133,12 +103,43 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         {
             VerbParticle.Type.MoodSpecifier => ColorPalette.VerbMood,
             VerbParticle.Type.TenseSpecifier => ColorPalette.VerbTense,
-            VerbParticle.Type.AspectSpecifier => Color.Black,
-            VerbParticle.Type.DestinationSpecifier => ColorPalette.VerbDestinationSpecifier,
-            VerbParticle.Type.ObjectSpecifier => ColorPalette.VerbObjectSpecifier,
+            VerbParticle.Type.AspectSpecifier => ColorPalette.VerbAspect,
+            VerbParticle.Type.DestinationSpecifier => ColorPalette.VerbDestinationParticle,
+            VerbParticle.Type.ObjectSpecifier => ColorPalette.VerbObjectParticle,
 
             _ => throw new InvalidOperationException("Invalid particle type at rendering")
         };
+    }
+
+
+
+
+    public void ProcessPronoun(Pronoun pronoun)
+    {
+        AddWord(pronoun.Word, ColorPalette.Pronoun);
+    }
+
+
+
+
+    public void ProcessNoun(Noun noun)
+    {
+        AddWord(noun.Word, noun.IsVerb ? ColorPalette.VerbNoun : ColorPalette.Noun);
+
+        if (noun.Adjective is not null)
+            AddWord(noun.Adjective, ColorPalette.Adjective);
+    }
+
+
+
+
+    public void ProcessExpect(Expect expect)
+    {
+        if (expect.Got is null)
+            return;
+
+        var color = expect.Got.Value.HasError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
+        AddWord(expect.Got, color);
     }
 
 

@@ -7,10 +7,10 @@ public interface ISyntacticStructureProcessor
 {
     void ProcessConjunction(Conjunction conjunction);
     void ProcessVerb(Verb verb);
+    void ProcessVerbParticle(VerbParticle particle);
     void ProcessPronoun(Pronoun pronoun);
     void ProcessNoun(Noun noun);
     void ProcessExpect(Expect expect);
-    void ProcessVerbParticle(VerbParticle particle);
 }
 
 

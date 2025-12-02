@@ -3,10 +3,12 @@ namespace Psyan.Analyzer.Structures;
 
 
 
-public class Noun(Word word, Word? adjective = null) : SyntacticStructure
+public class Noun(Word word, Word? adjective = null, bool isVerb = false) : SyntacticStructure
 {
     public Word Word { get; } = word;
     public Word? Adjective { get; } = adjective;
+
+    public bool IsVerb { get; } = isVerb;
 
 
 

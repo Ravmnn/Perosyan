@@ -20,8 +20,9 @@ public static class ColorPalette
     public static Style VerbMood => Color.DarkOliveGreen2;
     public static Style VerbNoun => Color.SpringGreen2_1;
     public static Style VerbTense => Color.Violet;
-    public static Style VerbDestinationSpecifier => Color.Honeydew2;
-    public static Style VerbObjectSpecifier => Color.Honeydew2;
+    public static Style VerbAspect => Color.Plum2;
+    public static Style VerbDestinationParticle => Color.Honeydew2;
+    public static Style VerbObjectParticle => Color.Honeydew2;
 
     public static Style Conjunction => Color.HotPink_1;
 }

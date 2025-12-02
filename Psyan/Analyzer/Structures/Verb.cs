@@ -8,29 +8,30 @@ namespace Psyan.Analyzer.Structures;
 
 public class Verb(
     SyntacticStructure? subject,
-    SyntacticStructure moodWord,
+    SyntacticStructure moodParticle,
     SyntacticStructure? verbNoun,
-    SyntacticStructure? tenseWord = null,
-    SyntacticStructure? destinationSpecifier = null,
+    SyntacticStructure? tenseParticle = null,
+    SyntacticStructure? aspectParticle = null,
+    SyntacticStructure? destinationParticle = null,
     SyntacticStructure? destination = null,
-    SyntacticStructure? objectSpecifier = null,
+    SyntacticStructure? objectParticle = null,
     SyntacticStructure? @object = null
 ) : SyntacticStructure
 {
     public SyntacticStructure? Subject { get; } = subject;
-    public SyntacticStructure MoodWord { get; } = moodWord;
+    public SyntacticStructure MoodParticle { get; } = moodParticle;
     public SyntacticStructure? VerbNoun { get; } = verbNoun;
-    public SyntacticStructure? TenseWord { get; } = tenseWord;
+    public SyntacticStructure? TenseParticle { get; } = tenseParticle;
+    public SyntacticStructure? AspectParticle { get; } = aspectParticle;
 
-    public MoodType Mood { get; } = MoodTypeOf(moodWord.BaseWord()) ?? throw new ArgumentException("Invalid mood word");
-    public TenseType Tense { get; } = TenseTypeOf(tenseWord?.BaseWord()) ?? throw new ArgumentException("Invalid tense word");
+    public MoodType Mood { get; } = MoodTypeOf(moodParticle.BaseWord()) ?? throw new ArgumentException("Invalid mood word");
+    public TenseType Tense { get; } = TenseTypeOf(tenseParticle?.BaseWord()) ?? throw new ArgumentException("Invalid tense word");
+    public AspectType? Aspect { get; } = aspectParticle is null ? null : AspectTypeOf(aspectParticle.BaseWord());
 
-    // TODO: add aspects
-
-    public SyntacticStructure? DestinationSpecifier { get; } = destinationSpecifier;
+    public SyntacticStructure? DestinationParticle { get; } = destinationParticle;
     public SyntacticStructure? Destination { get; } = destination;
 
-    public SyntacticStructure? ObjectSpecifier { get; } = objectSpecifier;
+    public SyntacticStructure? ObjectParticle { get; } = objectParticle;
     public SyntacticStructure? Object { get; } = @object;
 
 
@@ -83,10 +84,34 @@ public class Verb(
 
 
 
+    public enum AspectType
+    {
+        Continuous,
+        Initiative,
+        Terminative
+    }
+
+
+    public static AspectType? AspectTypeOf(Word word) => word.String switch
+    {
+        "na" => AspectType.Continuous,
+        "te" => AspectType.Initiative,
+        "ge" => AspectType.Terminative,
+
+        _ => null
+    };
+
+
+    public static bool IsAspect(Word word)
+        => AspectTypeOf(word) is not null;
+
+
+
+
     public override void Process(ISyntacticStructureProcessor processor)
         => processor.ProcessVerb(this);
 
 
     public override Word BaseWord()
-        => MoodWord.BaseWord();
+        => MoodParticle.BaseWord();
 }

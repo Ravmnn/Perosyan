@@ -63,14 +63,15 @@ public class Parser(Word[] words)
         if (moodParticle is Expect)
             return subject;
 
-        var verbNoun = ParseNoun();
+        var verbNoun = ParseNoun(true);
 
         var tenseParticle = ParseVerbParticleOrNull(VerbParticle.Type.TenseSpecifier);
+        var aspectParticle = ParseVerbParticleOrNull(VerbParticle.Type.AspectSpecifier);
 
         var (destinationParticle, destination) = ParseVerbArgument(VerbParticle.Type.DestinationSpecifier);
         var (objectParticle, @object) = ParseVerbArgument(VerbParticle.Type.ObjectSpecifier);
 
-        return new Verb(subject, moodParticle, verbNoun, tenseParticle, destinationParticle, destination, objectParticle, @object);
+        return new Verb(subject, moodParticle, verbNoun, tenseParticle, aspectParticle, destinationParticle, destination, objectParticle, @object);
     }
 
 
@@ -104,7 +105,7 @@ public class Parser(Word[] words)
 
     private SyntacticStructure ParseNounOrPronoun(bool advanceIfInvalid = true)
     {
-        if (ParseNoun(false) is Noun noun)
+        if (ParseNoun(advanceIfInvalid: false) is Noun noun)
             return noun;
 
         if (ParsePronoun(false) is Pronoun pronoun)
@@ -127,7 +128,7 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseNoun(bool advanceIfInvalid = true)
+    private SyntacticStructure ParseNoun(bool isVerb = false, bool advanceIfInvalid = true)
     {
         var expect = CreateExpect("Expect noun");
 
@@ -139,7 +140,7 @@ public class Parser(Word[] words)
 
         var adjective = ParseSingleNoun(false);
 
-        return new Noun(noun!.Word, adjective?.Word);
+        return new Noun(noun!.Word, adjective?.Word, isVerb);
     }
 
 
