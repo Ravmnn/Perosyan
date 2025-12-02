@@ -18,6 +18,8 @@ public static class ColorPalette
     public static Style Adjective => Color.SteelBlue1_1;
     public static Style Pronoun => Color.Gold3_1;
 
+    public static Style PrepositionParticle => Color.IndianRed_1;
+
     public static Style VerbMoodParticle => Color.DarkOliveGreen2;
     public static Style VerbNoun => Color.SpringGreen2_1;
     public static Style VerbTenseParticle => Color.Violet;

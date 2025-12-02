@@ -35,10 +35,6 @@ public class VerbParticle(Word word) : Particle(word), IParticleValidator, IPart
     };
 
 
-    public static bool IsVerbParticle(Word word)
-        => TypeOf(word) is not null;
-
-
 
 
     public override void Process(ISyntacticStructureProcessor processor)

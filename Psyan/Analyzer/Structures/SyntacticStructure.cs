@@ -12,6 +12,8 @@ public interface ISyntacticStructureProcessor
     void ProcessConjunctionParticle(ConjunctionParticle particle);
     void ProcessVerb(Verb verb);
     void ProcessVerbParticle(VerbParticle particle);
+    void ProcessPreposition(Preposition preposition);
+    void ProcessPrepositionParticle(PrepositionParticle particle);
     void ProcessPronoun(Pronoun pronoun);
     void ProcessNoun(Noun noun);
     void ProcessBoolean(Boolean boolean);

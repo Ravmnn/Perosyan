@@ -9,8 +9,6 @@ using Boolean = Psyan.Analyzer.Structures.Boolean;
 
 namespace Psyan.Analyzer;
 
-// TODO: add prepositions
-
 
 
 
@@ -78,6 +76,7 @@ public class Parser(Word[] words)
         var conjunction = ParseConjunctionParticle(conjunctionType);
         var conjunctionSplitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
 
+        // TODO: allow association
         var right = ParseVerb();
 
         return new Conjunction(left, right, conjunction, sentenceSplitter, conjunctionSplitter);
@@ -92,7 +91,7 @@ public class Parser(Word[] words)
 
     private SyntacticStructure ParseVerb()
     {
-        var subject = ParsePrimitive();
+        var subject = ParsePreposition();
 
         if (ParseVerbParticle(VerbParticle.Type.MoodSpecifier) is not VerbParticle moodParticle)
             return subject;
@@ -123,10 +122,29 @@ public class Parser(Word[] words)
         SyntacticStructure? @object = null;
 
         if (particle is not null)
-            @object = ParsePrimitive();
+            @object = ParsePreposition();
 
         return (particle, @object);
     }
+
+
+
+
+    private SyntacticStructure ParsePreposition()
+    {
+        var left = ParsePrimitive();
+
+        if (ParsePrepositionParticle() is not PrepositionParticle preposition)
+            return left;
+
+        var right = ParsePrimitive();
+
+        return new Preposition(left, right, preposition);
+    }
+
+
+    private SyntacticStructure ParsePrepositionParticle(PrepositionParticle.Type? particleType = null)
+        => ParseParticle<PrepositionParticle>("Expect preposition particle", (int?)particleType);
 
 
 

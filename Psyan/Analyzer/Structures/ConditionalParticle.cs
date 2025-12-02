@@ -28,10 +28,6 @@ public class ConditionalParticle(Word word) : Particle(word), IParticleValidator
     };
 
 
-    public static bool IsConditionalParticle(Word word)
-        => TypeOf(word) is not null;
-
-
 
 
     public override void Process(ISyntacticStructureProcessor processor)

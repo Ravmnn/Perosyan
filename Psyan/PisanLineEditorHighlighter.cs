@@ -26,6 +26,9 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
 {
     private List<StyleSpan> _spans = [];
 
+    private bool _italic;
+    private bool _underline;
+
 
 
 
@@ -112,6 +115,8 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
 
     public void ProcessVerb(Verb verb)
     {
+        _italic = true;
+
         verb.Subject?.Process(this);
         verb.MoodParticle.Process(this);
         verb.VerbNoun?.Process(this);
@@ -121,6 +126,8 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         verb.Destination?.Process(this);
         verb.ObjectParticle?.Process(this);
         verb.Object?.Process(this);
+
+        _italic = false;
     }
 
 
@@ -146,6 +153,24 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
 
             _ => throw new InvalidOperationException("Invalid particle type at rendering")
         };
+    }
+
+
+
+
+    public void ProcessPreposition(Preposition preposition)
+    {
+        Process(preposition.Left);
+        Process(preposition.PrepositionParticle);
+        Process(preposition.Right);
+    }
+
+
+
+
+    public void ProcessPrepositionParticle(PrepositionParticle particle)
+    {
+        AddWord(particle.Word, ColorPalette.PrepositionParticle);
     }
 
 
@@ -191,8 +216,12 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         if (expect.Got is null)
             return;
 
+        _underline = true;
+
         var color = expect.Got.Value.HasError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
         AddWord(expect.Got, color);
+
+        _underline = false;
     }
 
 
@@ -200,7 +229,21 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
 
     private void AddWord(Word? word, Style style)
     {
+        style = ApplyDecorations(style);
+
         if (word is not null)
             _spans.Add(new StyleSpan(word.Value.Token.Location, style));
+    }
+
+
+    private Style ApplyDecorations(Style style)
+    {
+        if (_italic)
+            style = style.Decoration(Decoration.Italic);
+
+        if (_underline)
+            style = style.Decoration(Decoration.Underline);
+
+        return style;
     }
 }

@@ -70,6 +70,8 @@ public class PisanCommand : Command<PisanCommandSettings>
     public static async Task RunInteractive(PisanCommandSettings settings, CancellationToken cancellationToken)
     {
         var editor = new LineEditor { Highlighter = new PisanLineEditorHighlighter() };
-        await editor.ReadLine(cancellationToken);
+
+        while (true)
+            await editor.ReadLine(cancellationToken);
     }
 }
