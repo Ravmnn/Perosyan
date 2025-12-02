@@ -35,7 +35,7 @@ public class OrthographicAnalyzer(string sourceWord = "")
         {
             // single-syllables are: a, e, i, o, u
             // bi-syllables are: ka, ke, sa, se, pi...
-            // tri-syllables are: kas, kes, sas, ses, pis...
+            // tri-syllables are: kas, kes, sas, ses, pis, pia, pai, kai, kea, koa...
 
             if (AddedTriSyllableDelimiterToLast(word, i) || AddedBiSyllable(word, ref i))
                 continue;
@@ -83,7 +83,21 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
 
     private bool IsCurrentCharacterATriSyllableDelimiter(string word, int i)
-        => i >= 2 && word[i] == 's' && _syllables.Last().SubString.Last() != 's';
+    {
+        if (i < 2)
+            return false;
+
+        var currentChar = word[i];
+        var lastChar = _syllables.Last().SubString.Last();
+
+        if (currentChar == lastChar)
+            return false;
+
+        var isPlural = currentChar == 's';
+        var isWedded = Alphabet.Vowels.Contains(currentChar);
+
+        return isPlural || isWedded;
+    }
 
 
     private bool IsNextSequenceASyllable(string word, int i)

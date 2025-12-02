@@ -137,6 +137,7 @@ public class Parser(Word[] words)
         if (ParsePrepositionParticle() is not PrepositionParticle preposition)
             return left;
 
+        // TODO: allow association as well
         var right = ParsePrimitive();
 
         return new Preposition(left, right, preposition);

@@ -10,7 +10,7 @@ class Program
 {
     public static void Main(string[] args)
     {
-        args = "-i".Split(' ');
+        //args = "-i".Split(' ');
 
         var root = new CommandApp<PisanCommand>();
         root.Run(args);
