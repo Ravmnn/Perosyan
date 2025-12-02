@@ -11,8 +11,9 @@ public static class ColorPalette
     public static Style Invalid => Color.Red3;
     public static Style InvalidOrthography => Color.Red3_1;
 
-    public static Style Punctuaction => Color.Gray62;
+    public static Style Punctuation => Color.Gray62;
 
+    public static Style Boolean => Color.DarkOrange3_1;
     public static Style Noun => Color.SteelBlue1;
     public static Style Adjective => Color.SteelBlue1_1;
     public static Style Pronoun => Color.Gold3_1;

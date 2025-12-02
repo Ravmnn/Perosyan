@@ -10,6 +10,7 @@ public interface ISyntacticStructureProcessor
     void ProcessVerbParticle(VerbParticle particle);
     void ProcessPronoun(Pronoun pronoun);
     void ProcessNoun(Noun noun);
+    void ProcessBoolean(Boolean boolean);
     void ProcessExpect(Expect expect);
 }
 

@@ -4,7 +4,14 @@ using System.Collections.Generic;
 using Psyan.Analyzer.Structures;
 
 
+using Boolean = Psyan.Analyzer.Structures.Boolean;
+
+
 namespace Psyan.Analyzer;
+
+// TODO: add boolean particles
+// TODO: add conditional sentences "fi? ...(; so, ...)?", and "fi so, ..." for probability
+// TODO: add A du B
 
 
 
@@ -57,7 +64,7 @@ public class Parser(Word[] words)
 
     private SyntacticStructure ParseVerb()
     {
-        var subject = ParseNounOrPronoun();
+        var subject = ParsePrimitive();
         var moodParticle = ParseVerbParticle(VerbParticle.Type.MoodSpecifier);
 
         if (moodParticle is Expect)
@@ -95,7 +102,7 @@ public class Parser(Word[] words)
         SyntacticStructure? @object = null;
 
         if (particle is not null)
-            @object = ParseNounOrPronoun();
+            @object = ParsePrimitive();
 
         return (particle, @object);
     }
@@ -103,15 +110,18 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseNounOrPronoun(bool advanceIfInvalid = true)
+    private SyntacticStructure ParsePrimitive(bool advanceIfInvalid = true)
     {
+        if (ParseBoolean(false) is Boolean boolean)
+            return boolean;
+
         if (ParseNoun(advanceIfInvalid: false) is Noun noun)
             return noun;
 
         if (ParsePronoun(false) is Pronoun pronoun)
             return pronoun;
 
-        return CreateExpectAndAdvance("Expect noun or pronoun", advanceIfInvalid);
+        return CreateExpectAndAdvance("Expect primitive (nouns, pronouns, booleans...)", advanceIfInvalid);
     }
 
 
@@ -153,6 +163,19 @@ public class Parser(Word[] words)
 
         return null;
     }
+
+
+
+
+    private SyntacticStructure ParseBoolean(bool advanceIfInvalid = true)
+    {
+        if (ParseSingleWord(Boolean.IsBoolean, advanceIfInvalid) is not { } boolean)
+            return CreateExpectAndAdvance("Expect boolean", advanceIfInvalid);
+
+        return new Boolean(boolean);
+    }
+
+
 
 
     private Word? ParseSingleWord(Func<Word, bool> predicate, bool advanceIfInvalid = true)

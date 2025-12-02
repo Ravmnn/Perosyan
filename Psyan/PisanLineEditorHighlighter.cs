@@ -9,6 +9,7 @@ using Spectre.Console.Rendering;
 
 using Psyan.Analyzer;
 using Psyan.Analyzer.Structures;
+using Boolean = Psyan.Analyzer.Structures.Boolean;
 
 
 namespace Psyan;
@@ -62,10 +63,10 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     public void ProcessConjunction(Conjunction conjunction)
     {
         Process(conjunction.Left);
-        AddWord(conjunction.ConjunctionSplitter, ColorPalette.Punctuaction);
+        AddWord(conjunction.ConjunctionSplitter, ColorPalette.Punctuation);
 
         AddWord(conjunction.ConjunctionWord, ColorPalette.Conjunction);
-        AddWord(conjunction.ConjunctionLinkSplitter, ColorPalette.Punctuaction);
+        AddWord(conjunction.ConjunctionLinkSplitter, ColorPalette.Punctuation);
 
         Process(conjunction.Right);
     }
@@ -128,6 +129,14 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
 
         if (noun.Adjective is not null)
             AddWord(noun.Adjective, ColorPalette.Adjective);
+    }
+
+
+
+
+    public void ProcessBoolean(Boolean boolean)
+    {
+        AddWord(boolean.Word, ColorPalette.Boolean);
     }
 
 
