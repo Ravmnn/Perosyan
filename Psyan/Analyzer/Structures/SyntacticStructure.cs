@@ -5,12 +5,16 @@ namespace Psyan.Analyzer.Structures;
 
 public interface ISyntacticStructureProcessor
 {
+    void ProcessConditional(Conditional conditional);
+    void ProcessConditionalParticle(ConditionalParticle particle);
     void ProcessConjunction(Conjunction conjunction);
+    void ProcessConjunctionParticle(ConjunctionParticle particle);
     void ProcessVerb(Verb verb);
     void ProcessVerbParticle(VerbParticle particle);
     void ProcessPronoun(Pronoun pronoun);
     void ProcessNoun(Noun noun);
     void ProcessBoolean(Boolean boolean);
+    void ProcessPunctuationParticle(PunctuationParticle particle);
     void ProcessExpect(Expect expect);
 }
 

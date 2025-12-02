@@ -9,9 +9,8 @@ using Boolean = Psyan.Analyzer.Structures.Boolean;
 
 namespace Psyan.Analyzer;
 
-// TODO: add boolean particles
-// TODO: add conditional sentences "fi? ...(; so, ...)?", and "fi so, ..." for probability
-// TODO: add A du B
+// TODO: "fi so, ..." for probability
+// TODO: add prepositions
 
 
 
@@ -33,7 +32,7 @@ public class Parser(Word[] words)
         var structures = new List<SyntacticStructure>();
 
         while (!AtEnd())
-            structures.Add(ParseConjunction());
+            structures.Add(ParseConditional());
 
         return structures;
     }
@@ -41,22 +40,60 @@ public class Parser(Word[] words)
 
 
 
-    private SyntacticStructure ParseConjunction()
+    private SyntacticStructure ParseConditional()
+    {
+        var ifParticle = ParseConditionalParticle(ConditionalParticle.Type.ConditionParticle);
+
+        if (ifParticle is Expect)
+            return ParseConjunction();
+
+        var conjunctionSentence = ParseConjunction(ConjunctionParticle.Type.CausalForward);
+
+        return new Conditional(ifParticle, conjunctionSentence);
+    }
+
+
+    private SyntacticStructure ParseConditionalParticle(ConditionalParticle.Type particleType)
+    {
+        if (!Match(ConditionalParticle.IsConditionalParticle, out var word, false) || ConditionalParticle.TypeOf(word) != particleType)
+            return CreateExpect($"Expect conditional particle ({particleType})");
+
+        Advance();
+        return new ConditionalParticle(word);
+    }
+
+
+
+
+    private SyntacticStructure ParseConjunction(ConjunctionParticle.Type? conjunctionType = null)
     {
         var left = ParseVerb();
 
-        if (!Match(Conjunction.IsConjunctionSplitter, out var conjunctionSplitter))
-            return left;
+        var sentenceSplitter = ParsePunctuationParticle(PunctuationParticle.Type.SentenceSplitter);
+        var conjunction = ParseConjunctionParticle(conjunctionType);
+        var conjunctionSplitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
 
-        if (!Match(Conjunction.IsConjunction, out var conjunction))
-            return left;
+        // TODO: improve error logging. it's not working very well here
 
-        if (!Match(Conjunction.IsConjunctionLinkSplitter, out var conjunctionLinkSplitter))
+        if (sentenceSplitter is Expect || conjunction is Expect || conjunctionSplitter is Expect)
             return left;
 
         var right = ParseVerb();
 
-        return new Conjunction(left, right, conjunction, conjunctionSplitter, conjunctionLinkSplitter);
+        return new Conjunction(left, right, conjunction, sentenceSplitter, conjunctionSplitter);
+    }
+
+
+    private SyntacticStructure ParseConjunctionParticle(ConjunctionParticle.Type? conjunctionType = null)
+    {
+        if (!Match(ConjunctionParticle.IsConjunctionParticle, out var word, false))
+            return CreateExpect("Expect conjunction particle");
+
+        if (conjunctionType is not null && ConjunctionParticle.TypeOf(word) != conjunctionType)
+            return CreateExpect($"Expect conjunction particle ({conjunctionType})");
+
+        Advance();
+        return new ConjunctionParticle(word);
     }
 
 
@@ -85,7 +122,7 @@ public class Parser(Word[] words)
     private SyntacticStructure ParseVerbParticle(VerbParticle.Type particleType)
     {
         if (!Match(VerbParticle.IsVerbParticle, out var word, false) || VerbParticle.TypeOf(word) != particleType)
-            return CreateExpectAndAdvance($"Expect verb particle ({particleType})", false);
+            return CreateExpect($"Expect verb particle ({particleType})");
 
         Advance();
         return new VerbParticle(word);
@@ -173,6 +210,22 @@ public class Parser(Word[] words)
             return CreateExpectAndAdvance("Expect boolean", advanceIfInvalid);
 
         return new Boolean(boolean);
+    }
+
+
+
+
+    // TODO: maybe it's possible to create a generic method for particle parsing
+    private SyntacticStructure ParsePunctuationParticle(PunctuationParticle.Type? punctuationType = null)
+    {
+        if (!Match(PunctuationParticle.IsPunctuationParticle, out var word, false))
+            return CreateExpect("Expect punctuation particle");
+
+        if (punctuationType is not null && PunctuationParticle.TypeOf(word) != punctuationType)
+            return CreateExpect($"Expect punctuation particle ({punctuationType})");
+
+        Advance();
+        return new PunctuationParticle(word);
     }
 
 

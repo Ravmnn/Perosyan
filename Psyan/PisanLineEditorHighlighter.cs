@@ -9,6 +9,8 @@ using Spectre.Console.Rendering;
 
 using Psyan.Analyzer;
 using Psyan.Analyzer.Structures;
+
+
 using Boolean = Psyan.Analyzer.Structures.Boolean;
 
 
@@ -60,19 +62,46 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         => structure.Process(this);
 
 
-    public void ProcessConjunction(Conjunction conjunction)
+
+
+    public void ProcessConditional(Conditional conditional)
     {
-        Process(conjunction.Left);
-        AddWord(conjunction.ConjunctionSplitter, ColorPalette.Punctuation);
-
-        AddWord(conjunction.ConjunctionWord, ColorPalette.Conjunction);
-        AddWord(conjunction.ConjunctionLinkSplitter, ColorPalette.Punctuation);
-
-        Process(conjunction.Right);
+        Process(conditional.IfParticle);
+        Process(conditional.ConjunctionSentence);
     }
 
 
 
+
+    public void ProcessConditionalParticle(ConditionalParticle particle)
+    {
+        AddWord(particle.Word, ColorPalette.ConditionalParticle);
+    }
+
+
+
+
+    public void ProcessConjunction(Conjunction conjunction)
+    {
+        Process(conjunction.Left);
+        Process(conjunction.ConjunctionSplitter);
+
+        Process(conjunction.ConjunctionWord);
+        Process(conjunction.ConjunctionLinkSplitter);
+
+        Process(conjunction.Right);
+    }
+
+    
+    
+    
+    public void ProcessConjunctionParticle(ConjunctionParticle particle)
+    {
+        AddWord(particle.Word, ColorPalette.ConjunctionParticle);
+    }
+
+    
+    
 
     public void ProcessVerb(Verb verb)
     {
@@ -102,9 +131,9 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     {
         return particle.ParticleType switch
         {
-            VerbParticle.Type.MoodSpecifier => ColorPalette.VerbMood,
-            VerbParticle.Type.TenseSpecifier => ColorPalette.VerbTense,
-            VerbParticle.Type.AspectSpecifier => ColorPalette.VerbAspect,
+            VerbParticle.Type.MoodSpecifier => ColorPalette.VerbMoodParticle,
+            VerbParticle.Type.TenseSpecifier => ColorPalette.VerbTenseParticle,
+            VerbParticle.Type.AspectSpecifier => ColorPalette.VerbAspectParticle,
             VerbParticle.Type.DestinationSpecifier => ColorPalette.VerbDestinationParticle,
             VerbParticle.Type.ObjectSpecifier => ColorPalette.VerbObjectParticle,
 
@@ -138,9 +167,17 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
     {
         AddWord(boolean.Word, ColorPalette.Boolean);
     }
+    
 
+    
+    
+    public void ProcessPunctuationParticle(PunctuationParticle particle)
+    {
+        AddWord(particle.Word, ColorPalette.PunctuationParticle);
+    }
 
-
+    
+    
 
     public void ProcessExpect(Expect expect)
     {
