@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+
 
 namespace Psyan.Analyzer.Structures;
 

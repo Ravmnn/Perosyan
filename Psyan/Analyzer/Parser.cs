@@ -70,16 +70,17 @@ public class Parser(Word[] words)
     {
         var left = ParseVerb();
 
-        if (ParsePunctuationParticle(PunctuationParticle.Type.SentenceSplitter) is not PunctuationParticle sentenceSplitter)
-            return left;
+        while (ParsePunctuationParticle(PunctuationParticle.Type.SentenceSplitter) is PunctuationParticle sentenceSplitter)
+        {
+            var conjunction = ParseConjunctionParticle(conjunctionType);
+            var conjunctionSplitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
 
-        var conjunction = ParseConjunctionParticle(conjunctionType);
-        var conjunctionSplitter = ParsePunctuationParticle(PunctuationParticle.Type.Comma);
+            var right = ParseVerb();
 
-        // TODO: allow association
-        var right = ParseVerb();
+            left = new Conjunction(left, right, conjunction, sentenceSplitter, conjunctionSplitter);
+        }
 
-        return new Conjunction(left, right, conjunction, sentenceSplitter, conjunctionSplitter);
+        return left;
     }
 
 
@@ -134,13 +135,13 @@ public class Parser(Word[] words)
     {
         var left = ParsePrimitive();
 
-        if (ParsePrepositionParticle() is not PrepositionParticle preposition)
-            return left;
+        while (ParsePrepositionParticle() is PrepositionParticle preposition)
+        {
+            var right = ParsePrimitive();
+            left = new Preposition(left, right, preposition);
+        }
 
-        // TODO: allow association as well
-        var right = ParsePrimitive();
-
-        return new Preposition(left, right, preposition);
+        return left;
     }
 
 
