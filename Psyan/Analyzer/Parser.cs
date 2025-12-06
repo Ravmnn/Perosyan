@@ -92,10 +92,16 @@ public class Parser(Word[] words)
 
     private SyntacticStructure ParseVerb()
     {
-        var subject = ParsePreposition();
+        SyntacticStructure? subject = null;
 
-        if (ParseVerbParticle(VerbParticle.Type.MoodSpecifier) is not VerbParticle moodParticle)
-            return subject;
+        if (ParseVerbMoodOrNull() is not { } moodParticle)
+        {
+            subject = ParsePreposition();
+            moodParticle = ParseVerbMoodOrNull();
+        }
+
+        if (moodParticle is null)
+            return subject!;
 
         var verbNoun = ParseNoun(true);
 
@@ -107,6 +113,10 @@ public class Parser(Word[] words)
 
         return new Verb(subject, moodParticle, verbNoun, tenseParticle, aspectParticle, destinationParticle, destination, objectParticle, @object);
     }
+
+
+    private VerbParticle? ParseVerbMoodOrNull()
+        => ParseVerbParticle(VerbParticle.Type.MoodSpecifier) as VerbParticle;
 
 
     private SyntacticStructure ParseVerbParticle(VerbParticle.Type? particleType = null)

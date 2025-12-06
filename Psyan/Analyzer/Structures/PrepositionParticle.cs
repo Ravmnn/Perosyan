@@ -12,7 +12,10 @@ public class PrepositionParticle(Word word) : Particle(word), IParticleValidator
         With,
         MadeBy,
         For,
-        When
+        When,
+        Or,
+        And,
+        Xor
     }
 
 
@@ -24,6 +27,9 @@ public class PrepositionParticle(Word word) : Particle(word), IParticleValidator
         "bi" => (int)Type.MadeBy,
         "to" => (int)Type.For,
         "be" => (int)Type.When,
+        "ro" => (int)Type.Or,
+        "ci" => (int)Type.And,
+        "co" => (int)Type.Xor,
 
         _ => null
     };

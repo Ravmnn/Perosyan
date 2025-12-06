@@ -9,5 +9,5 @@ public static class Alphabet
 
     // 'c' sounds like "ch"
     // "maca" (pc) -> "masha" (en)
-    public static readonly char[] Consonants = ['b', 'c', 'f', 'g', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't'];
+    public static readonly char[] Consonants = ['b', 'c', 'd', 'f', 'g', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't'];
 }

@@ -216,9 +216,11 @@ public class PisanLineEditorHighlighter : IHighlighter, ISyntacticStructureProce
         if (expect.Got is null)
             return;
 
+        var orthographyError = expect.Got.Value.HasError;
+
         _underline = true;
 
-        var color = expect.Got.Value.HasError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
+        var color = orthographyError ? ColorPalette.InvalidOrthography : ColorPalette.Invalid;
         AddWord(expect.Got, color);
 
         _underline = false;

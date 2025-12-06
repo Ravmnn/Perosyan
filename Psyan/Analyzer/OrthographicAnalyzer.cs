@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace Psyan.Analyzer;
 
 
@@ -8,7 +9,7 @@ namespace Psyan.Analyzer;
 
 public class OrthographicAnalyzer(string sourceWord = "")
 {
-    private List<Syllable> _syllables = [];
+    private readonly List<Syllable> _syllables = [];
 
 
     public string Word { get; set; } = sourceWord;
@@ -16,9 +17,9 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
 
 
-    public Syllable[] Split()
+    public IEnumerable<Syllable> Split()
     {
-        _syllables = [];
+        _syllables.Clear();
 
 
         var word = Word.Trim();
@@ -37,14 +38,29 @@ public class OrthographicAnalyzer(string sourceWord = "")
             // bi-syllables are: ka, ke, sa, se, pi...
             // tri-syllables are: kas, kes, sas, ses, pis, pia, pai, kai, kea, koa...
 
-            if (AddedTriSyllableDelimiterToLast(word, i) || AddedBiSyllable(word, ref i))
+            if (!AddedTriSyllableDelimiterToLast(word, i) && !AddedBiSyllable(word, ref i))
+            {
+                InvalidCharacter(word, i, i + 1);
+                continue;
+            }
+
+            if (_syllables.Count <= 5)
                 continue;
 
-            _syllables.Add(new InvalidSyllable(word, i, i + 1, "Invalid character sequence"));
+            MoreThanFiveSyllables(word, i + 1, i + 2);
+            break;
         }
 
-        return _syllables.ToArray();
+        return _syllables;
     }
+
+
+    private void InvalidCharacter(string word, int start, int end)
+        => _syllables.Add(new InvalidSyllable(word, start, end, "Invalid character sequence"));
+
+
+    private void MoreThanFiveSyllables(string word, int start, int end)
+        => _syllables[^1] = new InvalidSyllable(word, start, end, "Cannot have more than 5 syllables");
 
 
     private bool AddedTriSyllableDelimiterToLast(string word, int i)
@@ -87,14 +103,19 @@ public class OrthographicAnalyzer(string sourceWord = "")
         if (i < 2)
             return false;
 
-        var currentChar = word[i];
-        var lastChar = _syllables.Last().SubString.Last();
+        var atEnd = i + 1 >= word.Length;
 
-        if (currentChar == lastChar)
+        var lastSyllable = _syllables.Last();
+        var syllableFirstChar = lastSyllable.SubString.First();
+        var syllableLastChar = lastSyllable.SubString.Last();
+        var currentChar = word[i];
+
+        if (lastSyllable is InvalidSyllable || lastSyllable.SubString.Length == 3 || currentChar == syllableLastChar)
             return false;
 
-        var isPlural = currentChar == 's';
-        var isWedded = Alphabet.Vowels.Contains(currentChar);
+        var isPlural = atEnd && currentChar == 's';
+        var isWedded = Alphabet.Consonants.Contains(syllableFirstChar) && Alphabet.Vowels.Contains(syllableLastChar)
+                                                                       && Alphabet.Vowels.Contains(currentChar);
 
         return isPlural || isWedded;
     }
@@ -149,7 +170,7 @@ public class OrthographicAnalyzer(string sourceWord = "")
 
 
     public static Word GetWord(Token token)
-        => new Word(token, new OrthographicAnalyzer(token.Lexeme).Split());
+        => new Word(token, new OrthographicAnalyzer(token.Lexeme).Split().ToArray());
 
 
     public static IEnumerable<Word> GetWords(IEnumerable<Token> tokens)
