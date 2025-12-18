@@ -94,6 +94,8 @@ public class Parser(Word[] words)
     {
         SyntacticStructure? subject = null;
 
+        // TODO: add auxiliary verbs
+
         if (ParseVerbMoodOrNull() is not { } moodParticle)
         {
             subject = ParsePreposition();
@@ -108,10 +110,10 @@ public class Parser(Word[] words)
         var tenseParticle = ParseVerbParticleOrNull(VerbParticle.Type.TenseSpecifier);
         var aspectParticle = ParseVerbParticleOrNull(VerbParticle.Type.AspectSpecifier);
 
-        var (destinationParticle, destination) = ParseVerbArgument(VerbParticle.Type.DestinationSpecifier);
         var (objectParticle, @object) = ParseVerbArgument(VerbParticle.Type.ObjectSpecifier);
+        var (destinationParticle, destination) = ParseVerbArgument(VerbParticle.Type.DestinationSpecifier);
 
-        return new Verb(subject, moodParticle, verbNoun, tenseParticle, aspectParticle, destinationParticle, destination, objectParticle, @object);
+        return new Verb(subject, moodParticle, verbNoun, tenseParticle, aspectParticle, objectParticle, @object, destinationParticle, destination);
     }
 
 

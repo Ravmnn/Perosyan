@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 
 
 namespace Psyan.Analyzer.Structures;
@@ -19,8 +18,8 @@ public class VerbParticle(Word word) : Particle(word), IParticleValidator, IPart
         MoodSpecifier,
         TenseSpecifier,
         AspectSpecifier,
-        DestinationSpecifier,
-        ObjectSpecifier
+        ObjectSpecifier,
+        DestinationSpecifier
     }
 
 
@@ -30,8 +29,8 @@ public class VerbParticle(Word word) : Particle(word), IParticleValidator, IPart
         not null when Verb.IsTense(word) => (int)Type.TenseSpecifier,
         not null when Verb.IsAspect(word) => (int)Type.AspectSpecifier,
 
-        "ke" => (int)Type.DestinationSpecifier,
-        "li" => (int)Type.ObjectSpecifier,
+        "ke" => (int)Type.ObjectSpecifier,
+        "li" => (int)Type.DestinationSpecifier,
 
         _ => null
     };

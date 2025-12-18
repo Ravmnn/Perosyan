@@ -12,10 +12,10 @@ public class Verb(
     SyntacticStructure? verbNoun,
     SyntacticStructure? tenseParticle = null,
     SyntacticStructure? aspectParticle = null,
-    SyntacticStructure? destinationParticle = null,
-    SyntacticStructure? destination = null,
     SyntacticStructure? objectParticle = null,
-    SyntacticStructure? @object = null
+    SyntacticStructure? @object = null,
+    SyntacticStructure? destinationParticle = null,
+    SyntacticStructure? destination = null
 ) : SyntacticStructure
 {
     public SyntacticStructure? Subject { get; } = subject;
@@ -28,11 +28,11 @@ public class Verb(
     public TenseType Tense { get; } = TenseTypeOf(tenseParticle?.BaseWord()) ?? throw new ArgumentException("Invalid tense word");
     public AspectType? Aspect { get; } = aspectParticle is null ? null : AspectTypeOf(aspectParticle.BaseWord());
 
-    public SyntacticStructure? DestinationParticle { get; } = destinationParticle;
-    public SyntacticStructure? Destination { get; } = destination;
-
     public SyntacticStructure? ObjectParticle { get; } = objectParticle;
     public SyntacticStructure? Object { get; } = @object;
+
+    public SyntacticStructure? DestinationParticle { get; } = destinationParticle;
+    public SyntacticStructure? Destination { get; } = destination;
 
 
 
@@ -87,16 +87,16 @@ public class Verb(
     public enum AspectType
     {
         Continuous,
-        Initiative,
-        Terminative
+        // Initiative,
+        // Terminative
     }
 
 
     public static AspectType? AspectTypeOf(Word word) => word.String switch
     {
         "na" => AspectType.Continuous,
-        "te" => AspectType.Initiative,
-        "ge" => AspectType.Terminative,
+        // "te" => AspectType.Initiative,
+        // "ge" => AspectType.Terminative,
 
         _ => null
     };
